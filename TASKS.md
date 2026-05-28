@@ -100,6 +100,11 @@
         Done: removed ! assertions and ?? fallbacks; both modules now import from validated env object
 
 ## COMPLETED
+- [x] SYS-1: Migrate to indexed context system
+      Done: PLANNING.md sliced into 14 docs/ files. CLAUDE.md redesigned as
+      pointer index (~98 lines). Cold-start context reduced from ~1100 to ~130
+      lines for bug fixes. PLANNING.md archived in place with header note.
+
 - 2026-05-23: All Phase 1–4 tasks completed. Backend scaffold + full frontend built. TypeScript: zero errors.
 - 2026-05-23: Env security hardening done. Startup validators on both backend and frontend. No secrets ever logged.
 - 2026-05-23: Switched AI backend from Anthropic SDK to Google Gemini 1.5 Flash (free tier). Updated services.py, requirements.txt, env validator, .env.example. Same JSON output contract preserved.

@@ -1,117 +1,98 @@
-# CLAUDE.md — InterviewPrep AI · Persistent Brain
-# Claude Code reads this file automatically at the start of EVERY session.
-# Keep this file lean. It is loaded into context on every single task.
-# Full specs live in PLANNING.md — only load that when building something new.
+# CLAUDE.md — InterviewPrep AI · Master Index
+# Auto-loaded every session. Stays under 100 lines. Never bloat this file.
+# All specs live in docs/. Read this index first, then fetch only what you need.
 
-## WHO YOU ARE
-You are the sole engineer + product owner of InterviewPrep AI.
-Owner is resource-constrained (free tiers only, Claude Code Pro, laptop).
-Every decision must be: free → simple → scalable, in that order.
-Never suggest paid services. Never over-engineer.
+## IDENTITY
+Sole engineer on InterviewPrep AI. Constraints: free tiers only, Claude Code Pro.
+Every decision: free → simple → scalable. No paid services. No over-engineering.
 
-## WHAT THIS APP IS
-AI-powered interview prep tool. 5 USPs that competitors don't combine:
-1. JD → 20 custom questions in <10s (technical + behavioural + situational)
-2. Voice mock interview + STAR-framework scoring per answer (0-100)
-3. Weakness Pattern Tracker — cross-session memory of recurring mistakes
-4. Company Question Bank — crowdsourced real interview questions
-5. 60-Second Rapid Fire — timed speed training mode
+## APP IN ONE PARAGRAPH
+AI interview prep for Indian job seekers. 5 USPs: (1) JD → 20 custom questions <10s,
+(2) voice mock interview + STAR scoring 0-100, (3) cross-session weakness tracker,
+(4) crowdsourced company question bank, (5) 60-second rapid fire mode.
+Voice: Web Speech API, lang='en-IN'. Target: freshers, career switchers.
 
-Target users: Indian job seekers, freshers, career switchers.
-Indian English accent support required in voice features (lang: 'en-IN').
-
-## TECH STACK (LOCKED — do not change without owner approval)
-```
-Frontend : Next.js 14 App Router, TypeScript, Tailwind CSS, shadcn/ui
-Backend  : FastAPI (Python 3.11), existing scaffold at /app/
-Database : Supabase (Postgres + Auth + Storage)
-AI       : claude-sonnet-4-20250514 via Anthropic SDK — ALL AI calls here
+## TECH STACK (locked — owner approval to change)
+Frontend : Next.js 14, TypeScript strict, Tailwind, shadcn/ui → Vercel
+Backend  : FastAPI Python 3.11, app/ scaffold → Railway free tier
+Database : Supabase (Postgres + RLS + Auth)
+AI       : gemini-2.5-flash via google-generativeai — ALL AI calls in app/services.py
 Voice    : Web Speech API (browser-native, zero cost)
-Deploy   : Vercel (frontend) + Railway free tier (backend)
-Auth     : Supabase Auth — Google OAuth + Email
-```
+Auth     : Supabase Auth, Google OAuth + Email (Phase 6)
 
-## REPO STRUCTURE (source of truth)
-```
-interviewprep-main/
-├── CLAUDE.md              ← YOU ARE HERE (brain, always loaded)
-├── PLANNING.md            ← Full specs, schemas, code templates (load when building)
-├── TASKS.md               ← Current sprint tasks + status (update after every task)
-├── frontend/              ← Next.js 14 app
-│   ├── app/               ← Pages (App Router)
-│   ├── components/        ← Shared UI components
-│   └── lib/               ← types.ts, supabase.ts, claude.ts (API calls)
-├── app/                   ← FastAPI backend (existing scaffold)
-│   ├── main.py
-│   ├── api.py
-│   ├── services.py
-│   ├── schemas.py
-│   └── database.py
-├── supabase/
-│   └── migrations/
-│       └── 001_initial_schema.sql
-├── requirements.txt
-├── Procfile
-└── .env.example
-```
+## CODING RULES (non-negotiable)
+- TypeScript: strict mode, no `any`, no `@ts-ignore`
+- AI calls: backend only in app/services.py · frontend only in frontend/lib/claude.ts
+- Every json.loads() wrapped in try/except json.JSONDecodeError
+- Supabase RLS ON for every table, never bypass
+- No secrets in code — all via env vars (see docs/deploy.md)
+- Components: functional + hooks only, no class components
+- Every page: must have loading state + error state
+- Voice: always lang='en-IN'
 
-## CODING RULES (always follow)
-- TypeScript strict mode. No `any`. No `// @ts-ignore`.
-- Every Claude API call lives in `app/services.py` (backend) or `frontend/lib/claude.ts` (frontend). Never inline elsewhere.
-- All AI prompts: system prompt instructs JSON-only output. Parse with try/catch.
-- Supabase RLS is ON for every table. Never bypass it.
-- No secrets in code. All keys via env vars. Check `.env.example` for the list.
-- Components are functional + hooks only. No class components.
-- Every new page must have a loading state and an error state.
-- `en-IN` locale for all Web Speech API calls.
-
-## CONTEXT LOADING RULES (critical — read before every task)
-| Task type                        | Files to load                        |
-|----------------------------------|--------------------------------------|
-| Bug fix / small edit             | CLAUDE.md (auto) + relevant file only |
-| New feature / new page           | CLAUDE.md + PLANNING.md §relevant    |
-| Database change                  | CLAUDE.md + PLANNING.md §Schema      |
-| AI prompt change                 | CLAUDE.md + PLANNING.md §AI Prompts  |
-| Deployment / infra               | CLAUDE.md + PLANNING.md §Deploy      |
-| Full build from scratch          | CLAUDE.md + PLANNING.md (full)       |
-
-NEVER load PLANNING.md for a bug fix. It wastes context.
-ALWAYS update TASKS.md after completing any task.
-
-## ENVIRONMENT VARIABLES NEEDED
-```
-ANTHROPIC_API_KEY          → Anthropic console
-SUPABASE_URL               → Supabase project settings
-SUPABASE_SERVICE_KEY       → Supabase project settings (backend only)
-NEXT_PUBLIC_SUPABASE_URL   → Same as above (frontend)
-NEXT_PUBLIC_SUPABASE_ANON_KEY → Supabase anon key (frontend)
-NEXT_PUBLIC_API_URL        → Backend URL (localhost:8000 dev, Railway URL prod)
-```
-
-## WEAKNESS TAGS (canonical list — never invent new ones)
+## WEAKNESS TAGS (canonical — never add new ones)
 missing_situation | missing_task | missing_action | missing_result
 too_vague | over_explains | no_quantified_impact | no_technical_depth
 rambling | skips_conclusion | overconfident | underconfident
 
 ## TEST COMMANDS
 ```bash
-# Backend
-uvicorn app.main:app --reload
-curl http://localhost:8000/health
-
-# Frontend
-cd frontend && npm run dev
-
-# Type check
-cd frontend && npx tsc --noEmit
+python -m py_compile app/services.py app/api.py app/main.py  # backend syntax
+cd frontend && npx tsc --noEmit                               # frontend types
+uvicorn app.main:app --reload                                 # run backend
+cd frontend && npm run dev                                    # run frontend
 ```
 
-## WHAT TO DO WHEN STUCK
-1. Check TASKS.md — is the task already defined there?
-2. Check PLANNING.md §relevant section for specs
-3. Do NOT invent architecture. Follow what's in PLANNING.md.
-4. If genuinely ambiguous, add a comment `# TODO: needs owner decision` and move on.
+## ALWAYS DO
+- Read this file first (auto-loaded)
+- Lookup the INDEX below → fetch only the doc(s) for your task
+- Update TASKS.md after every task (mark [x] with one-line note)
+
+## NEVER DO
+- Load docs/ files not listed for your task type — wasted context
+- Invent architecture not in docs/ — add `# TODO: owner decision` and move on
+- Load docs/frontend-pages.md for a backend bug fix
+- Load docs/backend.md for a frontend component tweak
+
+---
+
+## 📋 CONTEXT INDEX — look up your task type, load only those files
+
+| Task Type | Load These Files |
+|-----------|-----------------|
+| Bug fix / small edit | CLAUDE.md (auto) + the broken file only |
+| New backend endpoint | docs/backend-api.md + docs/backend-schemas.md |
+| New backend service (AI call) | docs/backend-services.md + docs/ai-prompts.md |
+| New frontend page | docs/frontend-pages.md + docs/frontend-lib.md |
+| New frontend component | docs/frontend-components.md |
+| Database change | docs/schema.md |
+| Auth / Supabase wiring | docs/schema.md + docs/backend-api.md |
+| Deployment / infra / env vars | docs/deploy.md |
+| Phase 2+ roadmap feature | docs/roadmap.md → then lookup specific doc above |
+| Full rebuild from scratch | ALL docs/ files (last resort only) |
+| AI prompt tuning | docs/ai-prompts.md + docs/backend-services.md |
+| Frontend lib (types/api wrapper) | docs/frontend-lib.md |
+| Requirements / dependencies | docs/backend-requirements.md |
+
+## 📁 DOCS DIRECTORY (what lives where)
+```
+docs/
+├── schema.md               — 6 Supabase tables + RLS policies (99 lines)
+├── backend.md              — full backend spec (260 lines) [fallback only]
+├── backend-api.md          — api.py routes only (53 lines)
+├── backend-schemas.md      — schemas.py Pydantic models (43 lines)
+├── backend-services.md     — services.py AI functions (123 lines)
+├── backend-requirements.md — requirements.txt pinned versions (11 lines)
+├── frontend.md             — full frontend spec (592 lines) [fallback only]
+├── frontend-setup.md       — Next.js scaffold commands (11 lines)
+├── frontend-lib.md         — types.ts + claude.ts + supabase.ts (77 lines)
+├── frontend-components.md  — VoiceRecorder, STARScoreCard, RapidFireTimer (144 lines)
+├── frontend-pages.md       — all 6 page specs (360 lines)
+├── deploy.md               — env vars, Procfile, Railway + Vercel steps (28 lines)
+├── ai-prompts.md           — prompt rules, JSON contract, token limits (13 lines)
+└── roadmap.md              — Phase 2+ features in priority order (8 lines)
+```
 
 ## LAST UPDATED
-<!-- Claude Code updates this line after major structural changes -->
-Initial setup — all phases pending
+2026-05-28: CLAUDE.md redesigned as pointer index. PLANNING.md sliced into docs/.
+            AI stack updated to Gemini 2.5 Flash. database.py reference removed.
