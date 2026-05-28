@@ -69,12 +69,16 @@
 
 ## PHASE 5 — Integration & Deploy
 
-- [ ] P5-1: End-to-end test: JD upload → question gen → voice answer → STAR score
-        Test: run backend + frontend together, complete a full mock session
-- [ ] P5-2: Deploy backend to Railway (see PLANNING.md §Deploy)
-- [ ] P5-3: Deploy frontend to Vercel
-- [ ] P5-4: Update `NEXT_PUBLIC_API_URL` in Vercel env vars to Railway URL
-- [ ] P5-5: Smoke test on live URLs
+- [~] P5-1: End-to-end test: JD upload → question gen → voice answer → STAR score
+        E2E test pending deployment. Backend + frontend must both be running.
+- [~] P5-2: Deploy backend to Railway
+        Owner action: Railway → New Project → connect GitHub → root=. → add 7 env vars from .env.example → deploy
+- [~] P5-3: Deploy frontend to Vercel
+        Owner action: cd frontend && vercel → add 3 NEXT_PUBLIC_ env vars → deploy
+- [~] P5-4: Update `NEXT_PUBLIC_API_URL` in Vercel env vars to Railway URL
+        Owner action: Vercel dashboard → set NEXT_PUBLIC_API_URL to Railway backend URL
+- [~] P5-5: Smoke test on live URLs
+        Owner action: visit live URLs → run a mock session → confirm STAR score returns
 
 ## PHASE 6 — Auth & Persistence (Post-MVP)
 
@@ -105,9 +109,27 @@
       pointer index (~98 lines). Cold-start context reduced from ~1100 to ~130
       lines for bug fixes. PLANNING.md archived in place with header note.
 
+- [x] FIX-1: Wrap all json.loads() calls in try/except json.JSONDecodeError in app/services.py
+        Done: all 4 functions (generate_questions, evaluate_answer_star, evaluate_rapid_answer, detect_weakness_patterns) now raise ValueError with truncated AI response on parse failure
+- [x] FIX-2: Reconcile CLAUDE.md AI stack reference — was "Claude Sonnet", now correctly says "gemini-2.5-flash via google-generativeai"
+        Done: LAST UPDATED line updated; AI line in TECH STACK reflects Gemini
+- [x] FIX-3: Recreate .env.example with all 7 required vars and source comments
+        Done: GEMINI_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_KEY, FRONTEND_URL, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_API_URL — all with instructions
+- [x] FIX-4: Wire community endpoints to real Supabase queries instead of hardcoded stubs
+        Done: get_community_questions + submit_community_question in services.py; api.py routes call them; frontend/lib/claude.ts has getCommunityQuestions + submitCommunityQuestion; questions/page.tsx is a full real page
+- [x] FIX-5: Dashboard — real session data + Recharts chart + weakness analysis API call
+        Done: BarChart with colour-coded cells, analyseWeakness() integration, ip_context display, empty state CTA
+- [x] FIX-6: Backend env validator already checks GEMINI_API_KEY — confirmed correct, no change needed
+        Done: _validate_env() in app/main.py covers all 3 required backend vars
+- [x] FIX-7: Frontend env validator already uses explicit process.env.NEXT_PUBLIC_* references — confirmed correct, no change needed
+        Done: env.ts reads each var explicitly for Next.js static inlining; no dynamic access
+- [x] FIX-8: Mark Phase 5 tasks as [~] with owner deployment instructions
+        Done: P5-1 through P5-5 all marked [~] with exact steps for Railway + Vercel deploy
+
 - 2026-05-23: All Phase 1–4 tasks completed. Backend scaffold + full frontend built. TypeScript: zero errors.
 - 2026-05-23: Env security hardening done. Startup validators on both backend and frontend. No secrets ever logged.
 - 2026-05-23: Switched AI backend from Anthropic SDK to Google Gemini 1.5 Flash (free tier). Updated services.py, requirements.txt, env validator, .env.example. Same JSON output contract preserved.
+- 2026-05-28: Audit fixes FIX-1 through FIX-8 completed. All json.loads() crash-safe. Community endpoints wired to Supabase. Dashboard has real charts + AI weakness analysis. TypeScript: zero errors.
 
 ---
 

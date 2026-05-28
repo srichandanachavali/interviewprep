@@ -38,10 +38,14 @@ async def analyse_weakness(payload: dict):
 
 @router.get("/community/questions")
 async def get_community_questions(company: str = None, role: str = None, limit: int = 20):
-    # TODO Phase 2: query Supabase community_questions table
-    return {"questions": [], "total": 0}
+    try:
+        return services.get_community_questions(company, role, limit)
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
 @router.post("/community/submit")
 async def submit_question(payload: dict):
-    # TODO Phase 2: insert to community_questions, validate with Claude
-    return {"status": "submitted", "message": "Under review"}
+    try:
+        return services.submit_community_question(payload)
+    except Exception as e:
+        raise HTTPException(500, str(e))

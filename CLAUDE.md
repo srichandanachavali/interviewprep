@@ -94,5 +94,4 @@ docs/
 ```
 
 ## LAST UPDATED
-2026-05-28: CLAUDE.md redesigned as pointer index. PLANNING.md sliced into docs/.
-            AI stack updated to Gemini 2.5 Flash. database.py reference removed.
+2026-05-28: AI backend updated to Gemini 2.5 Flash; CLAUDE.md reconciled post-audit.

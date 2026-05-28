@@ -1,9 +1,11 @@
 import google.generativeai as genai
 import json
 import os
+from supabase import create_client
 from app.schemas import STARScore
 
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+_sb = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
 
 _JSON_CONFIG = genai.types.GenerationConfig(response_mime_type="application/json")
 
@@ -48,7 +50,10 @@ Mix: 40% behavioural (STAR format), 40% technical (role-specific), 20% situation
 Rapid mode: all questions answerable in <15 seconds."""
 
     r = _model("You are an expert interviewer. Return valid JSON only. No markdown, no preamble.").generate_content(prompt)
-    return json.loads(r.text)
+    try:
+        return json.loads(r.text)
+    except json.JSONDecodeError:
+        raise ValueError(f"AI returned non-JSON response: {r.text[:200]}")
 
 
 def evaluate_answer_star(question, answer, q_type) -> STARScore:
@@ -80,7 +85,10 @@ Available tags: {', '.join(WEAKNESS_TAGS)}
 Max 3 tags. Only include tags that genuinely apply."""
 
     r = _model("You are an expert interview coach. Return valid JSON only.").generate_content(prompt)
-    return STARScore(**json.loads(r.text))
+    try:
+        return STARScore(**json.loads(r.text))
+    except json.JSONDecodeError:
+        raise ValueError(f"AI returned non-JSON response: {r.text[:200]}")
 
 
 def evaluate_rapid_answer(question, answer) -> dict:
@@ -91,7 +99,10 @@ Score 0-100: keyword coverage + relevance + conciseness.
 Return ONLY: {{"score": <int>, "feedback": "<one sentence>", "key_missed": "<concept or null>"}}"""
 
     r = _model("Fast interview evaluator. JSON only.").generate_content(prompt)
-    return json.loads(r.text)
+    try:
+        return json.loads(r.text)
+    except json.JSONDecodeError:
+        raise ValueError(f"AI returned non-JSON response: {r.text[:200]}")
 
 
 def detect_weakness_patterns(tags_history: list[list[str]]) -> dict:
@@ -116,3 +127,28 @@ def detect_weakness_patterns(tags_history: list[list[str]]) -> dict:
         ],
         "total_answers_analysed": len(all_tags)
     }
+
+
+def get_community_questions(company: str | None, role: str | None, limit: int) -> dict:
+    q = _sb.table("community_questions").select("*").eq("verified", True)
+    if company:
+        q = q.ilike("company", f"%{company}%")
+    if role:
+        q = q.ilike("role", f"%{role}%")
+    result = q.order("upvotes", desc=True).limit(limit).execute()
+    return {"questions": result.data, "total": len(result.data)}
+
+
+def submit_community_question(payload: dict) -> dict:
+    from app.schemas import CommunityQuestionSubmit
+    validated = CommunityQuestionSubmit(**payload)
+    _sb.table("community_questions").insert({
+        "submitted_by": validated.submitted_by,
+        "company": validated.company,
+        "role": validated.role,
+        "question_text": validated.question_text,
+        "question_type": validated.question_type,
+        "verified": False,
+        "upvotes": 0,
+    }).execute()
+    return {"status": "submitted", "message": "Under review — verified questions appear within 24h"}
