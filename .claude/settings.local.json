@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx shadcn@latest init --defaults --yes)",
+      "Bash(npx shadcn@latest add card input textarea badge progress toast tabs --yes)",
+      "Bash(npx shadcn@latest add card input textarea badge progress tabs --yes)"
+    ]
+  }
+}
