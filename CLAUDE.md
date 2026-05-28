@@ -1,5 +1,5 @@
 # CLAUDE.md — InterviewPrep AI · Master Index
-# Auto-loaded every session. Stays under 100 lines. Never bloat this file.
+# Auto-loaded every session. Stays under 60 lines. Never bloat this file.
 # All specs live in docs/. Read this index first, then fetch only what you need.
 
 ## IDENTITY
@@ -78,12 +78,12 @@ cd frontend && npm run dev                                    # run frontend
 ```
 docs/
 ├── schema.md               — 6 Supabase tables + RLS policies (99 lines)
-├── backend.md              — full backend spec (260 lines) [fallback only]
+├── backend.md              — full backend spec, all files (260 lines) [use sub-docs]
 ├── backend-api.md          — api.py routes only (53 lines)
 ├── backend-schemas.md      — schemas.py Pydantic models (43 lines)
 ├── backend-services.md     — services.py AI functions (123 lines)
 ├── backend-requirements.md — requirements.txt pinned versions (11 lines)
-├── frontend.md             — full frontend spec (592 lines) [fallback only]
+├── frontend.md             — full frontend spec (592 lines) [use sub-docs]
 ├── frontend-setup.md       — Next.js scaffold commands (11 lines)
 ├── frontend-lib.md         — types.ts + claude.ts + supabase.ts (77 lines)
 ├── frontend-components.md  — VoiceRecorder, STARScoreCard, RapidFireTimer (144 lines)
